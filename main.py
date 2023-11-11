@@ -1,16 +1,152 @@
-import subprocess
-
 import hid
+
+from pynput.keyboard import Controller, Key
 
 MY_DEVICE = (0x0810, 0x0001)
 
+kb = Controller()
 
-def trigger_adb_event(id):
-    subprocess.run(f"adb shell input keyevent {id}", shell=True)
+r5_keys = {
+    Key.up,
+    Key.down,
+    Key.left,
+    Key.right,
+    "a",
+    "s",
+    "z",
+    "x",
+}
+
+r6_keys = {"q", "w", Key.enter, Key.shift_r}
+
+r5_map = {
+    15: [],
+    0: [Key.up],
+    2: [Key.right],
+    4: [Key.down],
+    6: [Key.left],
+    31: ["s"],
+    47: ["x"],
+    79: ["z"],
+    143: ["a"],
+    1: [Key.up, Key.right],
+    3: [Key.right, Key.down],
+    5: [Key.down, Key.left],
+    7: [Key.left, Key.up],
+    16: ["s", Key.up],
+    18: ["s", Key.right],
+    20: ["s", Key.down],
+    22: ["s", Key.left],
+    32: ["x", Key.up],
+    34: ["x", Key.right],
+    36: ["x", Key.down],
+    38: ["x", Key.left],
+    63: ["s", "x"],
+    64: ["z", Key.up],
+    66: ["z", Key.right],
+    68: ["z", Key.down],
+    70: ["z", Key.left],
+    95: ["s", "z"],
+    111: ["z", "x"],
+    128: ["a", Key.up],
+    130: ["a", Key.right],
+    132: ["a", Key.down],
+    134: ["a", Key.left],
+    159: ["a", "s"],
+    175: ["a", "x"],
+    207: ["a", "z"],
+    17: ["s", Key.up, Key.right],
+    19: ["s", Key.right, Key.down],
+    21: ["s", Key.down, Key.left],
+    23: ["s", Key.left, Key.up],
+    33: ["x", Key.up, Key.right],
+    35: ["x", Key.right, Key.down],
+    37: ["x", Key.down, Key.left],
+    39: ["x", Key.left, Key.up],
+    48: ["s", "x", Key.up],
+    50: ["s", "x", Key.right],
+    52: ["s", "x", Key.down],
+    54: ["s", "x", Key.left],
+    65: ["z", Key.up, Key.right],
+    67: ["z", Key.right, Key.down],
+    69: ["z", Key.down, Key.left],
+    71: ["z", Key.left, Key.up],
+    80: ["s", "z", Key.up],
+    82: ["s", "z", Key.right],
+    84: ["s", "z", Key.down],
+    86: ["s", "z", Key.left],
+    96: ["z", "x", Key.up],
+    98: ["z", "x", Key.right],
+    100: ["z", "x", Key.down],
+    102: ["z", "x", Key.left],
+    129: ["a", Key.up, Key.right],
+    131: ["a", Key.right, Key.down],
+    133: ["a", Key.down, Key.left],
+    135: ["a", Key.left, Key.up],
+    144: ["a", "s", Key.up],
+    146: ["a", "s", Key.right],
+    148: ["a", "s", Key.down],
+    150: ["a", "s", Key.left],
+    160: ["a", "x", Key.up],
+    162: ["a", "x", Key.right],
+    164: ["a", "x", Key.down],
+    166: ["a", "x", Key.left],
+    191: ["a", "s", "x"],
+    192: ["a", "z", Key.up],
+    194: ["a", "z", Key.right],
+    196: ["a", "z", Key.down],
+    198: ["a", "z", Key.left],
+    223: ["a", "s", "z"],
+    239: ["a", "z", "x"],
+    81: ["s", "x", Key.up, Key.right],
+    83: ["s", "x", Key.right, Key.down],
+    85: ["s", "x", Key.down, Key.left],
+    87: ["s", "x", Key.left, Key.up],
+    97: ["z", "x", Key.up, Key.right],
+    99: ["z", "x", Key.right, Key.down],
+    101: ["z", "x", Key.down, Key.left],
+    103: ["z", "x", Key.left, Key.up],
+    145: ["a", "s", Key.up, Key.right],
+    147: ["a", "s", Key.right, Key.down],
+    149: ["a", "s", Key.down, Key.left],
+    151: ["a", "s", Key.left, Key.up],
+    193: ["a", "z", Key.up, Key.right],
+    195: ["a", "z", Key.right, Key.down],
+    197: ["a", "z", Key.down, Key.left],
+    199: ["a", "z", Key.left, Key.up],
+    255: ["a", "s", "z", "x"],
+    240: ["a", "s", "z", "x", Key.up],
+    242: ["a", "s", "z", "x", Key.right],
+    244: ["a", "s", "z", "x", Key.down],
+    246: ["a", "s", "z", "x", Key.left],
+    241: ["a", "s", "z", "x", Key.up, Key.right],
+    243: ["a", "s", "z", "x", Key.right, Key.down],
+    245: ["a", "s", "z", "x", Key.down, Key.left],
+    247: ["a", "s", "z", "x", Key.left, Key.up],
+}
 
 
-def trigger_adb_roll(x, y):
-    subprocess.run(f"adb shell input joystick roll {x} {y}", shell=True)
+r6_map = {
+    0: [],
+    1: ["q"],
+    2: ["w"],
+    16: [Key.shift_r],
+    32: [Key.enter],
+    3: ["q", "w"],
+    17: ["q", Key.shift_r],
+    18: ["w", Key.shift_r],
+    33: ["q", Key.enter],
+    34: ["w", Key.enter],
+    48: [Key.enter, Key.shift_r],
+    19: ["q", "w", Key.shift_r],
+    35: ["q", "w", Key.enter],
+    49: ["q", Key.enter, Key.shift_r],
+    50: ["w", Key.enter, Key.shift_r],
+    51: ["q", "w", Key.enter, Key.shift_r],
+}
+
+r5_pressed = set()
+r6_pressed = set()
 
 
 def main():
@@ -25,75 +161,33 @@ def main():
 
     while True:
         report = gamepad.read(64)
+
         if report:
-            if report[5] == 0:
-                print("Up pressed")
-                trigger_adb_event(19)
-
-            if report[5] == 4:
-                print("Down pressed")
-                trigger_adb_event(20)
-
-            if report[5] == 6:
-                print("left pressed")
-                trigger_adb_event(21)
-
-            if report[5] == 2:
-                print("right pressed")
-                trigger_adb_event(22)
-
-            if report[3] == 127 and report[4] == 127:
-                trigger_adb_roll(0, 0)
-
-            if report[5] == 31:
-                print("y pressed")
-                trigger_adb_event(100)
-
-            if report[5] == 47:
-                print("b pressed")
-                trigger_adb_event(97)
-
-            if report[5] == 79:
-                print("a pressed")
-                trigger_adb_event(96)
-
-            if report[5] == 143:
-                print("x pressed")
-                trigger_adb_event(99)
-
-            if report[6] == 2:
-                print("l1 pressed")
-                trigger_adb_event(103)
-
-            if report[6] == 4:
-                print("l2 pressed")
-                trigger_adb_event(104)
-
-            if report[6] == 1:
-                print("r1 pressed")
-                trigger_adb_event(102)
-
-            if report[6] == 8:
-                print("r2 pressed")
-                trigger_adb_event(105)
-
-            if report[6] == 32:
-                print("start pressed")
-                trigger_adb_event(108)
-
-            if report[6] == 16:
-                print("select pressed")
-                trigger_adb_event(109)
-
-            if report[6] == 64:
-                print("thumbl pressed")
-
-            if report[6] == 128:
-                print("thumbr pressed")
-
-            trigger_adb_roll((report[3] - 127) / 127, (report[4] - 127) / 127)
-
             print(report)
+            handle_report_5(r5_map[report[5]])
+            handle_report_6(r6_map[report[6]])
+
+
+def handle_report_5(keys):
+    for key in r5_keys:
+        if key in keys and key not in r5_pressed:
+            kb.press(key)
+            r5_pressed.add(key)
+
+        if key not in keys and key in r5_pressed:
+            kb.release(key)
+            r5_pressed.remove(key)
+
+
+def handle_report_6(keys):
+    for key in r6_keys:
+        if key in keys and key not in r6_pressed:
+            kb.press(key)
+            r6_pressed.add(key)
+
+        if key not in keys and key in r6_pressed:
+            kb.release(key)
+            r6_pressed.remove(key)
 
 
 if __name__ == "__main__":

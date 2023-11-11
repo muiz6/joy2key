@@ -1,3 +1,3 @@
-# avd_gamepad
+# joy2kay
 
-Connect your gamepad to AVD(Android Virtual Device).
+Map joystick to keyboard for apps that have poor joystick support.
